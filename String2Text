@@ -1,0 +1,247 @@
+
+//#include <FastLED.h>
+//#include <IRremote.h>
+//#include <IRremoteInt.h>
+
+//#include <avr/pgmspace.h>
+
+
+String LaufText = "GAB";
+
+
+uint8_t Rain[] = {         0,0,0,0,0,0,0,0,0,0,0,0,
+                       0,0,0,0,0,0,0,0,0,0,0,0,
+                       0,0,0,0,0,0,0,0,0,0,0,0,
+                       0,0,0,0,0,0,0,0,0,0,0,0,
+                       0,0,0,0,0,0,0,0,0,0,0,0};
+
+uint8_t text[] = {     0,1,1,1,0,1,1,1,0,1,1,1,
+                       0,1,0,1,0,1,0,1,0,1,0,0,
+                       0,1,1,1,0,1,1,0,0,1,0,0,
+                       0,1,0,1,0,1,0,1,0,1,0,0,
+                       0,1,0,1,0,1,1,1,0,1,1,1};
+const uint8_t A[] = { 1,1,1,
+                1,0,1,
+                1,1,1,
+                1,0,1,
+                1,0,1};
+const uint8_t B[] = { 1,1,1,
+                1,0,1,
+                1,1,0,
+                1,0,1,
+                1,1,1};
+const uint8_t C[] = { 1,1,1,
+                1,0,0,
+                1,0,0,
+                1,0,0,
+                1,1,1};
+const uint8_t D[] = { 1,1,0,
+                1,0,1,
+                1,0,1,
+                1,0,1,
+                1,1,0};
+const uint8_t E[] = { 1,1,1,
+                1,0,0,
+                1,1,0,
+                1,0,0,
+                1,1,1};
+const uint8_t F[] = { 1,1,1,
+                1,0,0,
+                1,1,0,
+                1,0,0,
+                1,0,0};
+const uint8_t G[] = { 1,1,1,
+                1,0,0,
+                1,0,1,
+                1,0,1,
+                1,1,1};
+const uint8_t H[] = { 1,0,1,
+                1,0,1,
+                1,1,1,
+                1,0,1,
+                1,0,1};
+const uint8_t I[] = { 1,1,1,
+                0,1,0,
+                0,1,0,
+                0,1,0,
+                1,1,1};
+const uint8_t J[] = { 1,1,1,
+                0,0,1,
+                0,0,1,
+                1,0,1,
+                1,1,1};
+const uint8_t K[] = { 1,0,1,
+                1,0,1,
+                1,1,0,
+                1,0,1,
+                1,0,1};
+const uint8_t L[] = { 1,0,0,
+                1,0,0,
+                1,0,0,
+                1,0,0,
+                1,1,1};
+const uint8_t M[] = { 1,0,1,
+                1,0,1,
+                1,1,1,
+                1,0,1,
+                1,0,1};
+const uint8_t N[] = { 1,1,1,
+                1,0,1,
+                1,0,1,
+                1,0,1,
+                1,0,1};
+const uint8_t P[] = { 1,1,1,
+                1,0,1,
+                1,1,1,
+                1,0,0,
+                1,0,0};
+// 1 = 16580863
+// 2 = 16613503
+// 3 = 16597183
+// 4 = 16589023
+// 5 = 16621663
+// 6 = 16605343
+// 7 = 16584943
+// 8 = 16617583
+// 9 = 16601263
+// * = 16593103
+// 0 = 16625743
+// # = 16609423
+// pfeil hoch = 16615543
+// pfeil links = 16591063
+// pfeil rechts = 16607383
+// pfeil runter = 16619623
+// OK = 16623703
+
+
+// Params for width and height of led matrix
+const uint8_t kMatrixWidth = 12;
+const uint8_t kMatrixHeight = 5;
+
+// Param for different pixel layouts
+bool    kMatrixSerpentineLayout = false;
+
+uint16_t XY( uint8_t x, uint8_t y)                    // Berrechnet anhand des layouts der led strips und der gr�sse der matrix die nummer von led an der Stelle x,y
+{
+  uint16_t i;
+
+  if( kMatrixSerpentineLayout == false) {
+    i = (y * kMatrixWidth) + x;
+  }
+
+  if( kMatrixSerpentineLayout == true) {
+    if( y & 0x01) {
+      // Odd rows run backwards
+      uint8_t reverseX = (kMatrixWidth - 1) - x;
+      i = (y * kMatrixWidth) + reverseX;
+    } else {
+      // Even rows run forwards
+      i = (y * kMatrixWidth) + x;
+    }
+  }
+
+  return i;
+}
+                                      // Filterarray
+void Char2Pixel(uint8_t CHAR[],int Position){
+  for (int i = 0; i < 5;i++){
+      text[XY(Position*4+1,i)] = 0;
+      }
+      for (int j = 0;j < 3;j++){
+      for (int i = 0;i < 5;i++){
+      text[XY(Position*4+j+1,i)] = CHAR[i*3+j];
+      }}
+}
+bool String2Pixels(String Text){                              // String auslesen und in pixel werte umwandeln / schreibt in text[]
+  int TextLaenge = Text.length();
+  for (int Position = 0; Position < TextLaenge;Position++){
+     char Letter = Text[Position];
+		//Serial.println(Letter);
+    uint8_t PassLetter[15];
+    switch (Letter){
+    case 'A':
+      memcpy(PassLetter, A, 15);
+      Char2Pixel(PassLetter,Position);
+    break;
+    case 'B':
+      memcpy(PassLetter, B, 15);
+      Char2Pixel(PassLetter,Position);
+    break;
+    case 'C':
+      memcpy(PassLetter, C, 15);
+      Char2Pixel(PassLetter,Position);
+    break;
+    case 'D':
+      memcpy(PassLetter, D, 15);
+      Char2Pixel(PassLetter,Position);
+    break;
+    case 'E':
+      memcpy(PassLetter, E, 15);
+      Char2Pixel(PassLetter,Position);
+    break;
+    case 'F':
+      memcpy(PassLetter, F, 15);
+      Char2Pixel(PassLetter,Position);
+    break;
+    case 'G':
+      memcpy(PassLetter, G, 15);
+      Char2Pixel(PassLetter,Position);
+    break;
+    case 'H':
+      memcpy(PassLetter, H, 15);
+      Char2Pixel(PassLetter,Position);
+    break;
+    case 'I':
+      memcpy(PassLetter, I, 15);
+      Char2Pixel(PassLetter,Position);
+    break;
+    case 'J':
+      memcpy(PassLetter, J, 15);
+      Char2Pixel(PassLetter,Position);
+    break;
+    case 'K':
+      memcpy(PassLetter, K, 15);
+      Char2Pixel(PassLetter,Position);
+    break;
+    case 'L':
+      memcpy(PassLetter, L, 15);
+      Char2Pixel(PassLetter,Position);
+    break;
+    case 'P':
+      memcpy(PassLetter, P, 15);
+      Char2Pixel(PassLetter,Position);
+    break;
+    default: 
+    kMatrixSerpentineLayout = false;
+  	break;
+    }
+    
+  }
+
+}
+
+
+
+
+void PrintTextArray(){
+ for (int i = 0; i < kMatrixHeight;i++){
+for (int j = 0; j < kMatrixWidth;j++){
+Serial.write(text[XY(j,i)]*3+32);
+}Serial.print("\n");
+}Serial.print("--------------------------------\n"); 
+}
+
+
+
+void setup()
+{
+    Serial.begin(9600);
+//std::string Test = "PCL";
+}
+
+void loop(){
+ PrintTextArray();
+  String2Pixels(LaufText);
+
+delay(1000);
+}
